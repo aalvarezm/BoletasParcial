@@ -1,0 +1,155 @@
+﻿@page "/Boletas/Validar"
+@using BP_Andres.Shared;
+@using BP_Andres.Shared.Entities.Enums;
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+
+
+<PageTitle>Boletas</PageTitle>
+
+<EditForm EditContext="editContext" OnValidSubmit="onValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="card col-xs-12 col-md-6 offset-md-3">
+        <div class="card-header">
+            <span>Boletos para concierto</span>
+        </div>
+        <div class="card-body">
+            <div class="my-3">
+                <label>Numero del boleto:</label>
+                <div>
+                    <InputText class="form-control" @bind-Value="@BoletaDTO.NumeroBoleta" />
+                    <ValidationMessage For="@(() => BoletaDTO.NumeroBoleta)" />
+                </div>
+            </div>
+            <div class="mb-3" hi>
+                
+                <div>
+                    
+                    @if(boleta.NumeroBoleta != null)
+                    {
+                        <label>Puerta de entrada</label>
+                        <select class="form-select" @bind="BoletaDTO.Porterias">
+
+                            @foreach (var puertaentrada in Enum.GetNames(typeof(Porterias)))
+                            {
+                                <option value="@puertaentrada">@puertaentrada</option>
+                            }
+
+                        </select>
+                        <ValidationMessage For="@(() => BoletaDTO.Porterias)" />
+                    }
+                    else{
+                        <select class="form-select" @bind="BoletaDTO.Porterias" hidden="select">
+
+                            @foreach (var puertaentrada in Enum.GetNames(typeof(Porterias)))
+                            {
+                                <option value="@puertaentrada">@puertaentrada</option>
+                            }
+
+                        </select>
+                        <ValidationMessage For="@(() => BoletaDTO.Porterias)" />
+                        }
+                    
+                </div>
+            </div>
+        </div>
+        <div class="card-footer d-flex justify-content-center">
+            @if (boleta.NumeroBoleta != null)
+            {
+                <button class="btn btn-success btn-lg btn-block" type="submit">Guardar Cambios</button>
+            }
+            else
+            {
+                <button class="btn btn-primary btn-lg btn-block" type="submit">Validar</button>
+            }
+        </div>
+    </div>
+
+</EditForm>
+
+@code {
+    private Boleta boleta = new();
+    private DTO BoletaDTO = new();
+
+    private EditContext editContext = null!;
+
+    private bool isSelectDisabled { get; set; } = true;
+
+    private bool BoletoValido { get; set; } = false;
+
+    protected override void OnInitialized()
+    {
+        editContext = new(BoletaDTO);
+    }
+
+    private async Task onValidSubmit()
+    {
+        if (BoletoValido)
+        {
+            await EditAsync();
+        }
+        else
+        {
+            await GetAsync();
+        }
+    }
+
+    private async Task GetAsync()
+    {
+        try
+        {
+            var httpResponse = await repository.Get<Boleta>($"/api/boletas/{BoletaDTO.NumeroBoleta}");
+
+            if (httpResponse.Error)
+            {
+                var message = await httpResponse.GetErrorMessageAsync();
+
+                await sweetAlertService.FireAsync("Error", "Boleta no valida", SweetAlertIcon.Error);
+                return;
+            }
+
+            boleta = httpResponse.Response!;
+
+            if (boleta.FueUsada)
+            {
+                await sweetAlertService.FireAsync("Error", $"Esta boleta fue usada en la fecha {boleta.FechaUso.ToString()} y se registró en la portería {boleta.PuertaDeEntrada}", SweetAlertIcon.Info);
+
+                boleta = new Boleta();
+                return;
+            }
+
+            BoletoValido = true;
+            isSelectDisabled = false;
+        }
+        catch (Exception ex)
+        {
+            await sweetAlertService.FireAsync("Error", ex.Message, SweetAlertIcon.Error);
+            return;
+        }
+
+    }
+
+    private async Task EditAsync()
+    {
+        boleta.FueUsada = true;
+        boleta.FechaUso = DateTime.Now;
+        boleta.PuertaDeEntrada = BoletaDTO.Porterias;
+
+        var httpResponse = await repository.Put("/api/boletas", boleta);
+
+        if (httpResponse.Error)
+        {
+            var message = await httpResponse.GetErrorMessageAsync();
+
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        await sweetAlertService.FireAsync("Confirmación", "Su boleta quedó registrado correctamente, puede avanzar", SweetAlertIcon.Success);
+
+        isSelectDisabled = true;
+        BoletoValido = false;
+        boleta = new Boleta();
+    }
+}

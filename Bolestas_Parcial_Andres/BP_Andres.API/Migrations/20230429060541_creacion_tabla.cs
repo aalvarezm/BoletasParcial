@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BP_Andres.API.Migrations
 {
     /// <inheritdoc />
-    public partial class Creacion_Tabla_Boleta : Migration
+    public partial class creacion_tabla : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,8 +17,10 @@ namespace BP_Andres.API.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    FechaUso = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    FueUsada = table.Column<bool>(type: "bit", nullable: false)
+                    FechaUso = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    FueUsada = table.Column<bool>(type: "bit", nullable: false),
+                    PuertaDeEntrada = table.Column<int>(type: "int", nullable: true),
+                    NumeroBoleta = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {

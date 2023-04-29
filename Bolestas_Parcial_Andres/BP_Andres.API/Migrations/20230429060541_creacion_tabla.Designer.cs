@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BP_Andres.API.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230429002658_Creacion_Tabla_Boleta")]
-    partial class Creacion_Tabla_Boleta
+    [Migration("20230429060541_creacion_tabla")]
+    partial class creacion_tabla
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,11 +33,18 @@ namespace BP_Andres.API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("FechaUso")
+                    b.Property<DateTime?>("FechaUso")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("FueUsada")
                         .HasColumnType("bit");
+
+                    b.Property<string>("NumeroBoleta")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("PuertaDeEntrada")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

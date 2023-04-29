@@ -30,11 +30,18 @@ namespace BP_Andres.API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("FechaUso")
+                    b.Property<DateTime?>("FechaUso")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("FueUsada")
                         .HasColumnType("bit");
+
+                    b.Property<string>("NumeroBoleta")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("PuertaDeEntrada")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

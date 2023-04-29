@@ -1,5 +1,6 @@
 using BP_Andres.WEB;
 using BP_Andres.WEB.Repositories;
+using CurrieTechnologies.Razor.SweetAlert2;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -8,6 +9,7 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7282/") });
-builder.Services.AddScoped<IRepository, Repository>(); //Me crea una instancia nueva del objeto cada que se realiza una inyección
+builder.Services.AddScoped<IRepository, Repository>();
+builder.Services.AddSweetAlert2();
 
 await builder.Build().RunAsync();

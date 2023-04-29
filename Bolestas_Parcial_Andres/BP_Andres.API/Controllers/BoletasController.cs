@@ -2,6 +2,7 @@
 using BP_Andres.Shared.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Sockets;
 
 namespace BP_Andres.API.Controllers
 {
@@ -16,14 +17,6 @@ namespace BP_Andres.API.Controllers
             _context = context;
         }
 
-        //[HttpPost]
-        //public async Task<ActionResult> PostAsync(Boleta boleta){
-
-        //    _context.Boletas.Add(boleta);
-        //    await _context.SaveChangesAsync();
-        //    return Ok(boleta);
-
-        //}
 
         [HttpGet]
         public async Task<ActionResult> GetAsync()
@@ -31,15 +24,32 @@ namespace BP_Andres.API.Controllers
             return Ok(await _context.Boletas.ToListAsync());
         }
 
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult> GetAsync(int id)
+        [HttpGet("{NumeroBoleta}")]
+        public async Task<ActionResult> GetAsync(string NumeroBoleta)
         {
-            var boleta = await _context.Boletas.FirstOrDefaultAsync(x => x.Id == id);
-            if(boleta == null)
+            var boleta = await _context.Boletas.FirstOrDefaultAsync(x => x.NumeroBoleta == NumeroBoleta);
+            if (boleta == null)
             {
-                return NotFound(); 
+                return NotFound();
             }
             return Ok(boleta);
+        }
+
+        [HttpPut]
+        public async Task<ActionResult> PutAsync(Boleta boleta)
+        {
+            try
+            {
+                _context.Update(boleta);
+
+                await _context.SaveChangesAsync();
+
+                return Ok(boleta);
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception.Message);
+            }
         }
 
     }
